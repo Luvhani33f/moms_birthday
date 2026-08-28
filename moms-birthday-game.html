@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#241627">
+<title>Happy Birthday!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --ink: #241627;
+    --ink-light: #3c2542;
+    --frosting: #FFEFD9;
+    --frosting-shadow: #F0DCB8;
+    --raspberry: #E85C7B;
+    --raspberry-dark: #C43F5E;
+    --gold: #F4B942;
+    --gold-dark: #D89A28;
+    --mint: #7FD9A8;
+    --cream-text: #FFF6E9;
+    --muted-text: #C9B7CC;
+    --font-display: 'Baloo 2', sans-serif;
+    --font-body: 'Nunito', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background: radial-gradient(ellipse 900px 700px at 50% 25%, var(--ink-light), var(--ink) 70%);
+    color: var(--cream-text);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .screen.active {
+    display: flex;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h1, h2 {
+    font-family: var(--font-display);
+    margin: 0;
+    font-weight: 700;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--gold);
+    border: none;
+    border-radius: 100px;
+    padding: 16px 34px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--gold-dark);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-dark); }
+  .btn:focus-visible { outline: 3px solid var(--mint); outline-offset: 4px; }
+
+  /* ---------- Intro screen ---------- */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--mint);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .intro-title {
+    font-size: clamp(30px, 8vw, 42px);
+    color: var(--frosting);
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+
+  .intro-title span { color: var(--raspberry); }
+
+  .intro-sub {
+    font-size: 16px;
+    color: var(--muted-text);
+    max-width: 340px;
+    margin-bottom: 8px;
+    line-height: 1.55;
+  }
+
+  /* ---------- Cake + candles (shared) ---------- */
+  .cake-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 28px auto 24px;
+  }
+
+  .candle-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: -6px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .candle {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    width: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .candle:focus-visible { outline: 3px solid var(--mint); outline-offset: 4px; border-radius: 6px; }
+
+  .flame {
+    width: 14px;
+    height: 20px;
+    border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+    background: radial-gradient(circle at 50% 70%, var(--gold) 0%, var(--raspberry) 100%);
+    transform-origin: bottom center;
+    box-shadow: 0 0 12px 3px rgba(244, 185, 66, 0.55);
+    animation: flicker 1.6s ease-in-out infinite;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+
+  .candle.out .flame {
+    transform: scale(0);
+    opacity: 0;
+    animation: none;
+  }
+
+  @keyframes flicker {
+    0%, 100% { transform: scale(1) rotate(-3deg); }
+    50% { transform: scale(1.08, 1.16) rotate(3deg); }
+  }
+
+  .wax {
+    width: 8px;
+    height: 34px;
+    margin-top: 2px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(45deg, var(--raspberry), var(--raspberry) 4px, var(--frosting) 4px, var(--frosting) 8px);
+  }
+
+  .smoke {
+    position: absolute;
+    top: -4px;
+    left: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .smoke.puff { animation: puff 0.7s ease-out forwards; }
+  @keyframes puff {
+    0% { opacity: 0.65; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-24px) scale(2.4); }
+  }
+
+  .cake-layer {
+    position: relative;
+    width: 220px;
+    height: 100px;
+    background: var(--frosting);
+    border-radius: 18px 18px 6px 6px;
+    box-shadow: 0 8px 0 var(--frosting-shadow);
+  }
+
+  .cake-layer::before {
+    content: "";
+    position: absolute;
+    top: -13px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background-image: radial-gradient(circle at 11px 14px, transparent 11px, var(--frosting) 11.5px);
+    background-size: 22px 20px;
+    background-repeat: repeat-x;
+  }
+
+  .sprinkle {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .cake-plate {
+    width: 250px;
+    height: 20px;
+    margin-top: 6px;
+    background: var(--ink-light);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05) inset;
+  }
+
+  /* ---------- Game screen ---------- */
+  .attempts-pill {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 6px 18px;
+    border-radius: 100px;
+    margin-bottom: 10px;
+  }
+
+  .game-title {
+    font-size: 24px;
+    color: var(--frosting);
+    margin-bottom: 4px;
+  }
+
+  .game-hint {
+    color: var(--muted-text);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .toast {
+    font-family: var(--font-body);
+    font-weight: 700;
+    background: var(--raspberry);
+    color: var(--cream-text);
+    padding: 10px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+    margin-top: 14px;
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    min-height: 18px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0) scale(1); }
+
+  /* ---------- Celebration screen ---------- */
+  .celebrate-title {
+    font-size: clamp(26px, 7vw, 36px);
+    color: var(--frosting);
+    margin-bottom: 10px;
+    animation: pop 0.6s ease;
+  }
+  @keyframes pop {
+    0% { transform: scale(0.7); opacity: 0; }
+    60% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .celebrate-msg {
+    color: var(--muted-text);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 360px;
+    margin: 0 0 26px;
+  }
+
+  .receipt {
+    position: relative;
+    background: var(--frosting);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    width: 100%;
+    max-width: 290px;
+    padding: 22px 20px 30px;
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.8;
+    margin-bottom: 30px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .receipt::after {
+    content: "";
+    position: absolute;
+    bottom: -9px;
+    left: 0;
+    width: 100%;
+    height: 18px;
+    background:
+      linear-gradient(-45deg, var(--frosting) 8px, transparent 0),
+      linear-gradient(45deg, var(--frosting) 8px, transparent 0);
+    background-size: 16px 18px;
+    background-repeat: repeat-x;
+    background-position: top;
+  }
+
+  .receipt-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .receipt-sub {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--raspberry-dark);
+    margin-bottom: 14px;
+  }
+  .receipt-divider {
+    border: none;
+    border-top: 1px dashed #C9B896;
+    margin: 10px 0;
+  }
+  .receipt-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .receipt-status {
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: var(--raspberry-dark);
+    margin-top: 8px;
+  }
+  .receipt-footer {
+    text-align: center;
+    font-size: 10px;
+    color: #8a7a5c;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  #confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div id="app">
+
+  <section class="screen active" id="screen-intro">
+    <div class="eyebrow">Stubborn Candle Co. Presents</div>
+    <h1 class="intro-title">Happy Birthday,<br><span id="intro-name">Mom</span>!</h1>
+    <p class="intro-sub">Before the celebrating can officially begin, there's the small matter of these candles. Fair warning: they don't go out without a fight.</p>
+    <div class="cake-wrap" id="cake-intro"></div>
+    <button class="btn" id="btn-start" type="button">Light 'Em Up</button>
+  </section>
+
+  <section class="screen" id="screen-game">
+    <div class="attempts-pill">ATTEMPTS: <span id="attempts-count">00</span></div>
+    <h2 class="game-title">Blow Out the Candles</h2>
+    <p class="game-hint">Tap the flames. Repeat as needed.</p>
+    <div class="toast" id="toast"></div>
+    <div class="cake-wrap" id="cake-game"></div>
+  </section>
+
+  <section class="screen" id="screen-celebrate">
+    <h1 class="celebrate-title" id="celebrate-title">🎉 Happy Birthday! 🎉</h1>
+    <p class="celebrate-msg" id="celebrate-message"></p>
+    <div class="receipt">
+      <div class="receipt-title">🧁 Stubborn Candle Co. 🧁</div>
+      <div class="receipt-sub">OFFICIAL BIRTHDAY RECEIPT</div>
+      <div class="receipt-row"><span>1x Birthday Cake</span><span>served &#10003;</span></div>
+      <div class="receipt-row"><span id="cert-candles">6x</span><span>trick candles</span></div>
+      <div class="receipt-row"><span>Status</span><span>DEFEATED</span></div>
+      <hr class="receipt-divider">
+      <div class="receipt-row"><span>Issued to</span><span id="cert-name">Mom</span></div>
+      <div class="receipt-row"><span>Date</span><span id="cert-date">-</span></div>
+      <div class="receipt-row"><span>Attempts logged</span><span id="cert-attempts">0</span></div>
+      <div class="receipt-status" id="cert-status"></div>
+      <div class="receipt-footer">thank you for your patronage<br>*** see you again next year ***</div>
+    </div>
+    <button class="btn" id="btn-replay" type="button">Blow Them Out Again</button>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ============================================================
+  // PERSONALIZE YOUR GAME HERE
+  // Change the name and message below - everything else updates
+  // automatically.
+  // ============================================================
+  const MOM_NAME = "Mom";
+  const BIRTHDAY_MESSAGE = "Wishing you the happiest of birthdays. Thank you for absolutely everything you do - here's to another trip around the sun with you in it.";
+  const CANDLE_COUNT = 6;
+
+  // ============================================================
+  // Funny relight messages
+  // ============================================================
+  const RELIGHT_MESSAGES = [
+    "Nice try. These are TRICK candles.",
+    "Ha! Not today.",
+    "Round two. Or five. Who's counting.",
+    "Bold of you to assume this would be easy.",
+    "These candles have more stamina than most people.",
+    "The candles just filed a formal complaint.",
+    "Error 404: Extinguishing not found.",
+    "That candle definitely just winked at you.",
+    "Achievement unlocked: Mild Frustration.",
+    "Legendary candles never die. Apparently."
+  ];
+
+  let lastMessageIndex = -1;
+  function randomMessage() {
+    let i;
+    do {
+      i = Math.floor(Math.random() * RELIGHT_MESSAGES.length);
+    } while (i === lastMessageIndex && RELIGHT_MESSAGES.length > 1);
+    lastMessageIndex = i;
+    return RELIGHT_MESSAGES[i];
+  }
+
+  // ============================================================
+  // DOM references
+  // ============================================================
+  const screens = {
+    intro: document.getElementById('screen-intro'),
+    game: document.getElementById('screen-game'),
+    celebrate: document.getElementById('screen-celebrate')
+  };
+  const introNameEl = document.getElementById('intro-name');
+  const celebrateTitleEl = document.getElementById('celebrate-title');
+  const cakeIntroEl = document.getElementById('cake-intro');
+  const cakeGameEl = document.getElementById('cake-game');
+  const attemptsCountEl = document.getElementById('attempts-count');
+  const toastEl = document.getElementById('toast');
+  const btnStart = document.getElementById('btn-start');
+  const btnReplay = document.getElementById('btn-replay');
+  const celebrateMessageEl = document.getElementById('celebrate-message');
+  const certCandlesEl = document.getElementById('cert-candles');
+  const certNameEl = document.getElementById('cert-name');
+  const certDateEl = document.getElementById('cert-date');
+  const certAttemptsEl = document.getElementById('cert-attempts');
+  const certStatusEl = document.getElementById('cert-status');
+
+  introNameEl.textContent = MOM_NAME;
+  celebrateTitleEl.textContent = '\u{1F389} Happy Birthday, ' + MOM_NAME + '! \u{1F389}';
+
+  // ============================================================
+  // Cake markup builder (shared by the decorative intro cake
+  // and the interactive game cake)
+  // ============================================================
+  function buildCakeMarkup(interactive) {
+    let candlesHtml = '';
+    for (let i = 0; i < CANDLE_COUNT; i++) {
+      const tag = interactive ? 'button' : 'div';
+      const extra = interactive
+        ? 'type="button" data-index="' + i + '" aria-label="Candle ' + (i + 1) + '"'
+        : '';
+      candlesHtml +=
+        '<' + tag + ' class="candle" ' + extra + '>' +
+          '<div class="smoke"></div>' +
+          '<div class="flame"></div>' +
+          '<div class="wax"></div>' +
+        '</' + tag + '>';
+    }
+
+    const sprinkleColors = ['var(--raspberry)', 'var(--gold)', 'var(--mint)'];
+    let sprinklesHtml = '';
+    for (let i = 0; i < 10; i++) {
+      const left = 16 + Math.random() * 188;
+      const top = 22 + Math.random() * 52;
+      const color = sprinkleColors[i % sprinkleColors.length];
+      sprinklesHtml += '<div class="sprinkle" style="left:' + left + 'px; top:' + top + 'px; background:' + color + ';"></div>';
+    }
+
+    return (
+      '<div class="candle-row">' + candlesHtml + '</div>' +
+      '<div class="cake-layer">' + sprinklesHtml + '</div>' +
+      '<div class="cake-plate"></div>'
+    );
+  }
+
+  cakeIntroEl.innerHTML = buildCakeMarkup(false);
+
+  // ============================================================
+  // Game state + logic
+  // ============================================================
+  let attempts = 0;
+  let candles = [];
+
+  function initGame() {
+    attempts = 0;
+    updateAttempts();
+    cakeGameEl.innerHTML = buildCakeMarkup(true);
+    candles = [];
+
+    const nodes = cakeGameEl.querySelectorAll('.candle');
+    nodes.forEach(function (node) {
+      const c = {
+        el: node,
+        smokeEl: node.querySelector('.smoke'),
+        needed: 2 + Math.floor(Math.random() * 3), // 2-4 hits to stay out
+        hits: 0,
+        lit: true,
+        transitioning: false
+      };
+      node.addEventListener('click', function () { handleCandleClick(c); });
+      candles.push(c);
+    });
+  }
+
+  function updateAttempts() {
+    attemptsCountEl.textContent = String(attempts).padStart(2, '0');
+  }
+
+  function handleCandleClick(c) {
+    if (!c.lit || c.transitioning) return;
+
+    attempts++;
+    updateAttempts();
+    c.hits++;
+    c.transitioning = true;
+
+    c.el.classList.add('out');
+    c.smokeEl.classList.remove('puff');
+    void c.smokeEl.offsetWidth; // restart the puff animation
+    c.smokeEl.classList.add('puff');
+    playPop();
+
+    if (c.hits >= c.needed) {
+      c.lit = false;
+      c.transitioning = false;
+      checkAllOut();
+    } else {
+      showToast(randomMessage());
+      const delay = 550 + Math.random() * 500;
+      setTimeout(function () {
+        c.el.classList.remove('out');
+        c.transitioning = false;
+      }, delay);
+    }
+  }
+
+  let toastTimeout = null;
+  function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(function () {
+      toastEl.classList.remove('show');
+    }, 1600);
+  }
+
+  function checkAllOut() {
+    if (candles.every(function (c) { return !c.lit; })) {
+      setTimeout(showCelebration, 700);
+    }
+  }
+
+  function statusLine(n) {
+    if (n < CANDLE_COUNT * 2.5) return 'Suspiciously Efficient';
+    if (n < CANDLE_COUNT * 3.5) return 'Certified Birthday Champion';
+    return 'Legendary Levels of Persistence';
+  }
+
+  function showCelebration() {
+    switchScreen('celebrate');
+    celebrateMessageEl.textContent = BIRTHDAY_MESSAGE;
+    certCandlesEl.textContent = CANDLE_COUNT + 'x';
+    certNameEl.textContent = MOM_NAME;
+    certAttemptsEl.textContent = String(attempts);
+    certDateEl.textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    certStatusEl.textContent = statusLine(attempts);
+    launchConfetti();
+    playTada();
+  }
+
+  function switchScreen(name) {
+    Object.keys(screens).forEach(function (key) {
+      screens[key].classList.remove('active');
+    });
+    screens[name].classList.add('active');
+  }
+
+  btnStart.addEventListener('click', function () {
+    switchScreen('game');
+    initGame();
+  });
+
+  btnReplay.addEventListener('click', function () {
+    switchScreen('game');
+    initGame();
+  });
+
+  // ============================================================
+  // Confetti - plain canvas, no external library
+  // ============================================================
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let confettiParticles = [];
+  let confettiRAF = null;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const CONFETTI_COLORS = ['#E85C7B', '#F4B942', '#7FD9A8', '#FFF6E9', '#C43F5E'];
+
+  function launchConfetti() {
+    confettiParticles = [];
+    const count = 140;
+    for (let i = 0; i < count; i++) {
+      confettiParticles.push({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * canvas.height * 0.5,
+        w: 6 + Math.random() * 6,
+        h: 8 + Math.random() * 8,
+        color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+        speedY: 2 + Math.random() * 3,
+        speedX: (Math.random() - 0.5) * 2,
+        rotation: Math.random() * 360,
+        rotSpeed: (Math.random() - 0.5) * 10
+      });
+    }
+    if (confettiRAF) cancelAnimationFrame(confettiRAF);
+    animateConfetti();
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let stillActive = false;
+    confettiParticles.forEach(function (p) {
+      p.y += p.speedY;
+      p.x += p.speedX + Math.sin(p.y / 40);
+      p.rotation += p.rotSpeed;
+      if (p.y < canvas.height + 30) stillActive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    if (stillActive) {
+      confettiRAF = requestAnimationFrame(animateConfetti);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  // ============================================================
+  // Tiny sound effects - Web Audio API, no external files
+  // ============================================================
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        audioCtx = null;
+      }
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, start, duration, type, gainVal) {
+    const ctxA = getAudioCtx();
+    if (!ctxA) return;
+    const osc = ctxA.createOscillator();
+    const gain = ctxA.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, ctxA.currentTime + start);
+    gain.gain.linearRampToValueAtTime(gainVal || 0.08, ctxA.currentTime + start + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctxA.currentTime + start + duration);
+    osc.connect(gain);
+    gain.connect(ctxA.destination);
+    osc.start(ctxA.currentTime + start);
+    osc.stop(ctxA.currentTime + start + duration + 0.05);
+  }
+
+  function playPop() {
+    try { playTone(320, 0, 0.12, 'sine', 0.06); } catch (e) {}
+  }
+
+  function playTada() {
+    try {
+      [523.25, 659.25, 783.99, 1046.5].forEach(function (freq, i) {
+        playTone(freq, i * 0.09, 0.28, 'triangle', 0.07);
+      });
+    } catch (e) {}
+  }
+
+})();
+</script>
+</body>
+</html>
